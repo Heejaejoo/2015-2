@@ -1,0 +1,49 @@
+#lang racket
+
+(require "hw5-1.rkt")
+(require "hw5-2.rkt")
+
+(provide is-empty? fst rest length nth-elmt map reduce)
+
+(define (is-empty? #|tau list -> bool|# l #|tau list|#)
+  (if (equal? l #|tau list|# empty #|tau list|#) #t #|bool|# #f #|bool|#)
+  )
+
+(define (fst #|tau list-> tau + unit|# l #|tau list|#) 
+    (case-list #|(unit → σ) ∗ (τ ∗ τ list → σ) ∗ τ list → σ|#
+     (lambda (u) #|(unit → σ)|# (inr #|τ → τ + τ'|# empty #|unit|#))
+     (lambda (h t) #|(τ ∗ τ list → σ)|# (inl #|τ → τ + τ'|# h #|tau|#))
+     l #|τ list|#))
+
+(define (rest #|tau list-> tau + unit|# l #|tau list|#)
+    (case-list
+     (lambda (u) (inr empty))
+     (lambda (h t) (inl t))
+     l))
+
+(define (length l)
+      (case-list
+       (lambda (u) 0)
+       (lambda (h t) (+ 1 (length t)))
+       l))
+
+(define (nth-elmt l i)
+  (define tst
+    (lambda (lst cnt)
+      (case-list
+       (lambda (u) (inr empty))
+       (lambda (h t) (if (equal? cnt i) (inl h) (tst t (+ 1 cnt))))
+      lst)))
+    (tst l 0))
+
+(define (map f l)
+      (case-list
+       (lambda (u) empty)
+       (lambda (h t) (link (f h) (map f t)))
+      l))
+
+(define (reduce l f s)
+      (case-list
+       (lambda (u) s)
+       (lambda (h t) (f h (reduce t f s)))
+      l))

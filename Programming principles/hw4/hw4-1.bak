@@ -1,0 +1,92 @@
+#lang racket
+
+
+; We auto-grade only vlencode function; other functions are not
+; auto-graded.
+; If this "provide" statement is omitted, your submission will be graded 0.
+(provide vlencode)
+
+
+(define (vlencode frequencies) ; vlencode: (string X int) list -> (string X (int list)) list
+  (let ([freq (list-remove-zero frequencies)])
+  (if (null? freq) null
+      (if (equal? (length freq) 1) (list (cons (car (car freq)) (list 0)))
+          (tree-traversal (make-tree (list-sort-by-freq freq)) '()) )
+  )))
+  
+;  The output of vlencode should follow the following form.
+;  The exact code for each word can be different from this example,
+;   but the length of the code for each word should be the same.
+;  
+;  (define frequencies (list (cons "a" 5) (cons "b" 1) (cons "c" 1) (cons "d" 1)))
+;   (vlencode frequencies) =
+;     (list (cons "a" (list 0)) (cons "b" (list 1 0)) (cons "c" (list 1 1 0)) (cons "d" (list 1 1 1)))
+;
+;   (define frequencies (list (cons "a" 3) (cons "b" 4) (cons "c" 5) (cons "d" 6)))
+;     (list (cons "a" (list 0 0)) (cons "b" (list 0 1)) (cons "c" (list 1 0)) (cons "d" (list 1 1)))
+;
+;  (define frequencies (list (cons "a" 3) (cons "r" 27) (cons "b" 4) (cons "e" 0)))
+  
+
+
+;   (vlencode frequencies) =
+;     (list (cons "a" (list 0 0)) (cons "b" (list 0 1)) (cons "c" (list 1 0)) (cons "d" (list 1 1)))
+;
+
+(define (list-remove-zero mlist)
+  (define (list-remove-aux orig-lst lst)
+    (if (eq? orig-lst null) lst
+        (if (eq? (cdr (car orig-lst)) 0) (list-remove-aux (cdr orig-lst) lst)
+            (list-remove-aux (cdr orig-lst) (append lst (list (car orig-lst))))))
+    )(list-remove-aux mlist '()))
+
+(define (tree-traversal tree lst)
+  (if (isleaf? tree) (list (cons (leafstr tree) lst))
+      (append (tree-traversal (leftsub tree) (append lst (list 0))) (tree-traversal (rightsub tree) (append lst (list 1))))))
+              
+(define (extract-key key)
+  (if (isleaf? key) (leafval key)
+      (rootval key)))
+
+(define (list-sort-by-freq list)
+  (sort list (lambda (x y)
+               (< (extract-key x) (extract-key y)))))
+
+(define (node-make v1 v2)
+  (node v1 (+ (if (isleaf? v1) (leafval v1) (rootval v1))
+              (if (isleaf? v2) (leafval v2) (rootval v2))) v2))
+
+(define (make-tree lst)
+  (if (equal? (length lst) 1)
+      (car lst)
+      (make-tree (list-sort-by-freq (cons (node-make (list-ref lst 0) (list-ref lst 1)) (list-tail lst 2))))))
+
+; You may need the following tree interface (but not mandatory.)
+
+(define (leaf str val) ; leaf: string * value -> tree
+  (cons str val))
+
+(define (node lsub val rsub) ; node: tree * value * tree -> tree
+  (list lsub val rsub))
+
+(define (isleaf? tree) ; isleaf?: tree -> bool
+  (if (list? tree) #f
+   (if (string? (car tree)) #t #f)))
+
+(define (leftsub tree) ; leftsub: tree -> tree
+  (if (isleaf? tree) #f
+      (list-ref tree 0)))
+
+(define (rightsub tree) ; rightsub: tree -> tree
+  (if (isleaf? tree) #f
+      (list-ref tree 2)))
+
+(define (leafval tree) ; leafval: tree -> value
+  (if (isleaf? tree) (cdr tree)
+      #f))
+
+(define (leafstr tree) ; leftstr: tree -> string
+  (if (isleaf? tree) (car tree) #f))
+
+(define (rootval tree) ; rootval: tree -> value
+  (if (isleaf? tree) #f (list-ref tree 1)))

@@ -1,0 +1,7 @@
+compil_mode/<project>=byte-code
+eclipse.preferences.version=1
+flags/<project>=-g\u00A0
+make_exe/hw8_1_selfgrader.ml=hw8_1_selfgrader.exe
+make_exe/hw8_2_selfgrader.ml=hw8_2_selfgrader.exe
+make_exe/hw8_3_selfgrader.ml=hw8_3_selfgrader.exe
+make_exe/hw8_4_selfgrader.ml=hw8_4_selfgrader.exe

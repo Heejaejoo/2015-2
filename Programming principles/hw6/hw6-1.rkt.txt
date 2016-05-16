@@ -1,0 +1,62 @@
+#lang racket
+
+;;; If these statements are omitted, your submission will be graded 0.
+(provide memo-ways)
+(require compatibility/mlist)
+
+(define (make-table)
+   (mlist '*table*))
+
+(define (memoize f)
+   (let ((table (make-table)))
+     (lambda (x y)
+       (let ((previously-computed-result (lookup x y table)))
+         (or previously-computed-result
+             (let ((result (f x y)))
+               (insert! x y result table)
+               result))))))
+
+
+(define memo-ways
+  (memoize (lambda (n m)
+              (cond ((= n 0) 1)
+                    ((= m 0) 1)
+                    (else (+ (memo-ways (- n 1) m)
+                             (memo-ways n (- m 1))))))))
+
+
+(define (lookup key-1 key-2 table)
+   (let ((subtable (assoc key-1 (mcdr table))))
+     (if subtable
+         (let ((record (assoc key-2 (mcdr subtable))))
+           (if record
+               (mcdr record)
+               false))
+         false)))
+
+
+(define (assoc key records)
+   (cond ((null? records) false)
+         ((equal? key (mcar (mcar records))) (mcar records))
+         (else (assoc key (mcdr records)))))
+
+
+
+(define (insert! key-1 key-2 value table)
+   (let ((subtable (assoc key-1 (mcdr table))))
+     (if subtable
+         (let ((record (assoc key-2 (mcdr subtable))))
+           (if record
+               (set-mcdr! record value)
+               (set-mcdr! subtable
+                         (mcons (mcons key-2 value)
+                               (mcdr subtable)))))
+         (set-mcdr! table
+                   (mcons (mlist key-1
+                               (mcons key-2 value))
+                         (mcdr table)))))
+   'ok)
+
+
+
+

@@ -1,0 +1,24 @@
+#lang racket
+
+;;; If these statements are omitted, your submission will be graded 0.
+(provide memo-ways)
+
+(define (memo-ways n m) ; memo-ways: int * int -> int
+  (memoize
+   (lambda (n m)
+     (cond ((= n 0) 1)
+           ((= m 0) 1)
+           (else (+ (memo-ways (- n 1) m)
+                    (memo-ways n (- m 1))))))))
+(define (make-table)
+  (list '*table*))
+
+(define (memoize f)
+  (let ((table (make-table)))
+    (lambda (x)
+      (let ((previously-computed-result
+             (lookup x table)))
+        (or (previously-computed-result
+             (let ((result (f x)))
+               (insert! x result table)
+               result)))))))

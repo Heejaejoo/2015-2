@@ -1,0 +1,37 @@
+#lang racket
+; not for execution
+; write a type of each expression
+
+(define (sigma #|int*int*(int->int)->int|# lower #|int|# upper #|int|#)
+  (lambda (f #|int->int|#)
+    (define (loop #|int->int|# n #|int|#)
+      (if (> n #|int|# upper #|int|#) #|bool|# 0 #|int|#
+          (+ (f #|int->int|# n #|int|#)#|int|# (loop (+ n 1)#|int|#) #|int|#) #|int|#) #|int|#)
+    (loop #|int->int|# lower #|int|#) #|int|#
+    ) #|int|#
+  )
+
+(define (generic-sum  lower #|int|# upper #|int|# f #|int->int|# larger #|int*int->bool|# base #|int|# op #|int*int->int|# inc #|int->int|#)
+  (if (larger #|int*int->bool|# lower #|int|# upper #|int|#)#|bool|# base #|int|#
+      (op #|int*int->int|# (f #|int->int|# lower #|int|#) #|int|#
+          (generic-sum (inc lower) #|int|# upper #|int|# f #|int->int|# larger #|int*int->bool|# base #|int|# op #|int*int->int|# inc #|int->int|#) #|int|#) #|int|#
+      ) #|int|#
+  )
+
+(define (map #|(X->X)*(list) -> (list)|# f #|X->X|# l #|list|#)
+  (if (null? #|list->bool|# l #|list|#)#|bool|# '()#|list|# 
+      (cons (f #|X->X|# (car l)#|X|#)#|'a|# (map f (cdr l)) #|list|#)#|list|#
+      )#|list|#
+  )
+
+(define (reduce #|list*(X*Y->Y)*Y->Y|# l #|list|# op #|X*Y->Y|# init #|Y|#)
+  (if (null? #|list->bool|# l #|list|#)#|bool|# init #|Y|#
+      (op (car l)#|X|# (reduce (cdr l)#|list|# op init)#|Y|#)#|Y|#
+      )#|Y|#
+  )
+
+(define (map-reduce f #|X->X|# l #|list|# op #|X*Y->Y|# init #|Y|#)
+  (reduce (map #|(X->X)*(list) -> (list)|# f #|X->X|# l #|list|#) #|list|# op #|X*Y->Y|# init #|Y|#) #|Y|#
+  )
+
+; X, Y are symbol

@@ -1,0 +1,13 @@
+#lang racket
+
+(provide iter)
+
+(define (iter n f) 
+ (lambda (x)
+   (if (= n 0) x
+          (if (> n 0) (f ((iter (- n 1) f) x))
+              (f ((iter (+ n 1) f) x))))))
+
+(define f1 (lambda (x) (+ 2 x)))
+(define fadd (lambda (x) (cons (+ (car x) 1) (cdr x))))
+(define exc (lambda (x) (cons (cdr x) (car x))))

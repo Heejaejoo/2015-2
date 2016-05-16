@@ -1,0 +1,223 @@
+#lang racket
+
+(provide black)
+(provide white)
+
+(provide glue-array-from-tree)
+(provide glue-array-from-array)
+(provide rotate-array)
+(provide neighbor-array)
+(provide pprint-array)
+(provide is-array?)
+
+(provide glue-tree-from-tree)
+(provide glue-tree-from-array)
+(provide rotate-tree)
+(provide neighbor-tree)
+(provide pprint-tree)
+(provide is-tree?)
+
+(provide array-to-tree)
+(provide tree-to-array)
+
+(provide glue)
+(provide rotate)
+(provide neighbor)
+(provide pprint)
+
+
+;;; primitive tile
+
+(define black ; black: form
+  'B)
+(define white ; white: form
+  'W)
+
+
+;;; complex tile
+;
+; An array tile looks like:
+; (cons 'array (list row_1 row_2 ... row_n)),
+; for each row_i = (list cell_i1 ... cell_in).
+;
+; Examples:
+; 1.
+; (cons 'array (list (list 'B 'B) (list 'W 'W)))
+; BB
+; WW
+;
+; 2.
+; (cons 'array (list (list 'B 'B 'B 'B) (list 'B 'B 'B 'B) (list 'W 'W 'B 'B) (list 'W 'W 'B 'B)))
+; BBBB
+; BBBB
+; WWBB
+; WWBB
+;
+;
+; An tree tile looks like:
+; (cons 'tree (list subtree_nw subtree_ne subtree_se subtree_sw)).
+;
+; Examples:
+; 1.
+; (cons 'tree (list 'B 'B 'W 'B))
+; BB
+; BW
+;
+; 2.
+; (cons 'tree (list (list 'B 'B 'B 'W) (list 'B 'B 'W 'B) (list 'B 'W 'B 'B) (list 'W 'B 'B 'B)))
+; BBBB
+; WBBW
+; WBBW
+; BBBB
+;
+; See hw5-4-selfgrader.rkt for more details on grading array and tree representation.
+;(define nw1 (cons 'array (list (list 'B 'W 'W 'B) (list 'W 'B 'B 'B) (list 'W 'B 'W 'B) (list 'W 'B 'B 'W))))
+;(define ne1 (cons 'array (list (list 'B 'B 'B 'B) (list 'B 'B 'B 'B) (list 'W 'W 'B 'B) (list 'W 'W 'B 'B))))
+;(define se1 (cons 'array (list (list 'B 'B 'B 'B) (list 'B 'B 'B 'B) (list 'W 'W 'B 'B) (list 'W 'W 'B 'B))))
+;(define sw1 (cons 'array (list (list 'B 'B 'B 'B) (list 'B 'B 'B 'B) (list 'W 'W 'B 'B) (list 'W 'W 'B 'B))))
+;(define nw2 (cons 'tree (list (list 'B 'B 'B 'W) (list 'B 'B 'W 'B) (list 'B 'W 'B 'B) (list 'W 'B 'B 'B))))
+;(define ne2 (cons 'tree (list (list 'B 'B 'B 'W) (list 'B 'B 'W 'B) (list 'B 'W 'B 'B) (list 'W 'B 'B 'B))))
+;(define se2 (cons 'tree (list (list 'B 'B 'B 'W) (list 'B 'B 'W 'B) (list 'B 'W 'B 'B) (list 'W 'B 'B 'B))))
+;(define sw2 (cons 'tree (list (list 'B 'B 'B 'W) (list 'B 'B 'W 'B) (list 'B 'W 'B 'B) (list 'W 'B 'B 'B))))
+
+
+(define (glue-array-from-tree nw ne se sw) ; glue-array-from-tree: form * form * form * form -> form
+  (glue-array-from-array (tree-to-array nw) (tree-to-array ne) (tree-to-array se) (tree-to-array sw)))
+
+(define (glue-array-from-array nw ne se sw) ; glue-array-from-array: form * form * form * form -> form
+  (if (list? nw)
+      (cons 'array
+        (append (map (lambda (list1 list2) (append list1 list2)) (cdr nw) (cdr ne)) (map (lambda (list1 list2) (append list1 list2)) (cdr sw) (cdr se))))
+      (cons 'array (list (list nw ne) (list sw se)))))
+
+(define (glue-tree-from-tree nw ne se sw) ; glue-tree-from-tree: form * form * form * form -> form
+  (if (list? nw)
+      (cons 'tree (list (cdr nw) (cdr ne) (cdr se) (cdr sw)))
+      (cons 'tree (list nw ne se sw))))
+
+(define (glue-tree-from-array nw ne se sw) ; glue-tree-from-array: form * form * form * form -> form
+  (glue-tree-from-tree (array-to-tree nw) (array-to-tree ne) (array-to-tree se) (array-to-tree sw)))
+                        
+(define (rotate-array f) ; rotate-array: form -> form
+  (cond [(equal? 'B f) 'B]
+         [(equal? 'W f) 'W]
+         [(is-basic-array? (cdr f)) (cons 'array (list (list (list-ref (list-ref (cdr f) 1) 0) (list-ref (list-ref (cdr f) 0) 0))
+                                                       (list (list-ref (list-ref (cdr f) 1) 1) (list-ref (list-ref (cdr f) 0) 1))))]
+         [else (let ([quat (array-quarter-divide (cdr f))]) (glue-array-from-array (rotate-array (cons 'array (list-ref quat 3))) (rotate-array (cons 'array (list-ref quat 0)))
+                                                                                   (rotate-array (cons 'array (list-ref quat 1))) (rotate-array (cons 'array (list-ref quat 2)))))]))
+
+(define (neighbor-array location f) ; neighbor-array: location * form -> int
+  'TODO)
+
+; In the document, it is said to have type form -> void, but implement
+; as form -> string.
+; Read hw5-4-selfgrader.rkt for formatting.
+
+(define (pprint-array f) ; pprint-array: form -> string
+  (cond [(null? f) ""]
+        [(eq? f 'B) "B\n"]
+        [(eq? f 'W) "W\n"]
+        [else (string-append (printlist (if (eq? (car f) 'array) (car (cdr f)) (car f)) "") "\n" (pprint-array (if (eq? (car f) 'array) (cdr (cdr f)) (cdr f))))]))
+
+(define (printlist lst str)
+   (cond [(eq? lst 'B) "B"]
+         [(eq? lst 'W) "W"]
+         [(null? lst) str]
+         [else (if (eq? (car lst) 'B) (printlist (cdr lst) (string-append str "B")) (printlist (cdr lst) (string-append str "W")))]))
+
+(define (is-array? f) ; is-array?: form -> bool
+  (cond [(equal? 'B f) #t]
+        [(equal? 'W f) #t]
+        [(equal? 'array (car f)) #t]
+        [else #f]))
+
+
+;;; implementation with tree
+
+(define (rotate-tree f) ; rotate-tree: form -> form
+  (cond [(equal? 'B f) 'B]
+         [(equal? 'W f) 'W]
+         [(is-basic-tree? (cdr f)) (cons 'tree (list (list-ref (cdr f) 3) (list-ref (cdr f) 0) (list-ref (cdr f) 1) (list-ref (cdr f) 2)))]
+         [else (glue-tree-from-tree (rotate-tree (cons 'tree (list-ref (cdr f) 3))) (rotate-tree (cons 'tree (list-ref (cdr f) 0)))
+                                    (rotate-tree (cons 'tree (list-ref (cdr f) 1))) (rotate-tree (cons 'tree (list-ref (cdr f) 2))))]))
+
+(define (neighbor-tree loc f) ; neighbor-tree: location * form -> int
+  'TODO)
+
+; In the document, it is said to have type form -> void, but implement
+; as form -> string.
+(define (pprint-tree f) ; pprint-tree: form -> string
+  (cond [(eq? f 'B) "B\n"]
+        [(eq? f 'W) "W\n"]
+        [else (pprint-array (tree-to-array f))]))
+
+(define (is-tree? f) ; is-tree?: form -> bool
+  (cond [(equal? 'B f) #t]
+        [(equal? 'W f) #t]
+        [(equal? 'tree (car f)) #t]
+        [else #f]))
+
+(define basic-array (cons 'array (list (list 'B 'B) (list 'W 'B))))
+
+;;; conversions
+(define (is-basic-array? f)
+  (if (eq? (length f) 2) #t #f))
+(define (basic-array-conversion f)
+  (append (list-ref f 0) (reverse (list-ref f 1))))
+
+(define (is-basic-tree? f)
+  (if (list? (list-ref f 0)) #f #t))
+(define (basic-tree-conversion f)
+  (let ([half (list-half-divide f)]) (list (car half) (reverse (cdr half)))))
+
+(define (array-quarter-divide f)
+  (if (equal? (length f) 2) f
+      (let ([half (list-half-divide f)])
+        (list (map (lambda (lst) (car (list-half-divide lst))) (car half)) (map (lambda (lst) (cdr (list-half-divide lst))) (car half))
+               (map (lambda (lst) (cdr (list-half-divide lst))) (cdr half)) (map (lambda (lst) (car (list-half-divide lst))) (cdr half))))))
+
+(define (array-to-tree f) ; array-to-tree: form -> form
+  (cond [(equal? 'B f) 'B]
+        [(equal? 'W f) 'W]
+        [(is-basic-array? (cdr f)) (cons 'tree (basic-array-conversion (cdr f)))]
+        [else (let ([quat (array-quarter-divide (cdr f))])
+               (glue-tree-from-tree (array-to-tree (cons 'array (list-ref quat 0))) (array-to-tree (cons 'array (list-ref quat 1)))
+                                    (array-to-tree (cons 'array (list-ref quat 2))) (array-to-tree (cons 'array (list-ref quat 3)))))]))
+
+
+(define (tree-to-array f) ; tree-to-array: form -> form
+   (cond [(equal? 'B f) 'B]
+         [(equal? 'W f) 'W]
+         [(is-basic-tree? (cdr f)) (cons 'array (basic-tree-conversion (cdr f)))]
+         [else (glue-array-from-array (tree-to-array (cons 'tree (list-ref (cdr f) 0))) (tree-to-array (cons 'tree (list-ref (cdr f) 1)))
+                                      (tree-to-array (cons 'tree (list-ref (cdr f) 2))) (tree-to-array (cons 'tree (list-ref (cdr f) 3))))]))
+
+
+(define (list-half-divide l)
+  (let ([half (if (odd? (length l)) #f (quotient (length l) 2))])
+    (cons (take l half) (list-tail l half))))
+
+
+;;; interfaces
+
+(define (glue nw ne se sw) ; glue: form * form * form * form -> form
+  (let ([x (random 2)])
+    (cond [(is-tree? nw) (if (= x 0) (glue-array-from-tree nw ne se sw) (glue-tree-from-tree nw ne se sw))]
+          [else (if (= x 0) (glue-tree-from-array nw ne se sw) (glue-array-from-array nw ne se sw))])))
+
+(define (rotate f) ; rotate: form -> form
+  (if (is-array? f)
+      (rotate-array f)
+      (rotate-tree f)))
+
+(define (neighbor loc f) ; neighbor: location * form -> int
+  (if (is-array? f)
+      (neighbor-array loc f)
+      (neighbor-tree loc f)))
+
+; In the document, it is said to have type form -> void, but implement
+; as form -> string.
+(define (pprint f) ; pprint: form -> string
+  (if (is-array? f)
+      (pprint-array f)
+      (pprint-tree f)))

@@ -1,0 +1,29 @@
+#lang racket
+
+(require "hw5-1.rkt")
+(require "hw5-2.rkt")
+
+(provide is-empty? fst rest length nth-elmt map reduce)
+
+(define (is-empty? l)
+  (if (equal? l empty) #t #f))
+
+(define (fst l)
+  (inl (car l)))
+
+(define (rest l)
+  (inr (cdr l)))
+
+(define (length l)
+  (if (null? l) 0
+     (+ (length (cdr l)) 1)))
+
+(define (nth-elmt l i)
+  'TODO)
+
+(define (map f l)
+  'TODO)
+
+(define (reduce l f s)
+  (if (null? l) s
+      (f (car l) (reduce (cdr l) f s))))

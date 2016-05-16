@@ -1,0 +1,61 @@
+exception TODO
+
+type pgm = cmd
+and cmd = ASSIGN of exp
+ | SEQUENCE of cmd * cmd
+ | REPEAT of cmd
+ | CHOICE of cmd * cmd
+ | EQ of exp * cmd
+ | NEQ of exp * cmd
+and exp = NUM of int
+ | ADD of exp * exp
+ | SUB of exp * exp
+ | VAR
+
+type state = int
+
+let st_eval (e:state) :bool = 
+	not ((e > 5) || (e < -5))
+	
+let rec exp_exc (e:exp) (st:state): state =
+	match e with 
+	| NUM n -> n
+	| VAR -> st
+	| ADD (a, b) -> exp_exc a st + exp_exc b st
+	| SUB (a, b) -> exp_exc a st - exp_exc b st
+
+let rec remove_dup lst= match lst with 
+| [] -> []
+| h::t -> h::(remove_dup (List.filter (fun x -> x <> h) t))
+
+let rec clean_lst lst1 lst2 = remove_dup (List.append lst1 lst2)
+
+let rec exeval (p:pgm) (st:state) : state list = 
+let rec exeval_aux (p:pgm) sthlt =
+	let stat = (fst sthlt) in
+	let ht = (snd sthlt) in if ht then [(stat,ht)]
+	else 
+	(match p with
+	| ASSIGN exp -> let res = (exp_exc exp stat) in if (st_eval res) then [(res, false)] else [(stat, true)]
+	| SEQUENCE(cmd1, cmd2) -> let res = exeval_aux cmd1 (stat, false) in
+														let res_ref = ref [] in 
+														let f elem = res_ref := clean_lst !res_ref (exeval_aux cmd2 elem) in
+														let _ = List.iter f res in 
+														!res_ref 							
+			(*if cmd1 is wrong then terminate with st, if cmd2 is wrong then getout with result of cmd1*)
+			
+	| REPEAT(cmd) ->  let cur_rec = ref ((stat, false)::[]) in  
+										let rec loop c = 
+										let n = ref [] in 
+										let _ = n := !c in
+										let f elem = n:= remove_dup (List.append !n (exeval_aux cmd elem)) in
+										let _ = List.iter f !c in 	
+										if (c = n) then !c else loop n in
+										loop cur_rec 							
+											
+	| CHOICE(cmd1, cmd2) -> clean_lst (exeval_aux cmd1 (stat, false)) (exeval_aux cmd2 (stat, false))																	
+	| EQ(exp, cmd) -> if (exp_exc exp stat) == stat then exeval_aux cmd (stat, false) else ((stat,false)::[])
+	| NEQ(exp, cmd) -> if (exp_exc exp stat) != stat then exeval_aux cmd (stat, false) else ((stat,false)::[]))
+	in List.sort compare (remove_dup (List.map (fun x -> fst x) (exeval_aux p (st, false)))) 
+	
+	

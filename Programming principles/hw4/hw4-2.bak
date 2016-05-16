@@ -1,0 +1,104 @@
+#lang racket
+
+
+; We auto-grade only "react" function; other functions are not
+; auto-graded. However, S, K, I, v, and a are required for
+; grading. See hw4-2-grade.rkt for more information.
+(provide react S K I v a)
+
+
+; Implement react. 
+;
+; In the document, react has the type solution -> void.
+; However, implement react: solution -> string for ease of grading.
+; Return the string of the given solution printed by pprint.
+;
+; See hw4-2-grade.rkt for more information on what the returned string should look like.
+; In short,
+; S prints "S";
+; K prints "K";
+; I prints "I";
+; variable x prints "x";
+; tuple (E F) prints "(" + E + " " + F + ")".
+
+(define (react e) ; execute: solution -> string
+  (pprint
+   (calculate (calculate (calculate (calculate (calculate (calculate e))))))
+   ))
+
+(define S ; S: solution
+  (cons 'S 'sol))
+(define K ; K: solution
+  (cons 'K 'sol))
+(define I ; I: solution
+  (cons 'I 'sol))
+(define (v str) ; v: string -> solution
+  (cons str 'sol))
+(define (a lhs rhs) ; a: solution * solution -> solution
+  (cons (cons lhs rhs) 'sol))
+
+
+; You may need the following tree interface.
+
+
+(define (calculate e)
+  (cond
+    [(isS? e) (calculate (a (a (ar (al (al e))) (ar e)) (a (ar (al e)) (ar e))))]
+    [(isK? e) (calculate (ar (al e)))]
+    [(isI? e) (calculate (ar e))]
+    [else (if (isa? e)
+              (a (calculate (al e)) (calculate (ar e))) e)]))
+
+
+(define (isS? e) ; isS?: solution -> bool
+  (if (isa? e)
+      (if (isa? (al e))
+          (if (isa? (al (al e)))
+              (if (isa? (al (al (al e)))) #f
+                        (if (eq? (car (al (al (al e)))) 'S)
+                            #t #f))
+              #f)
+          #f)
+      #f))
+
+(define (isK? e) ; isK?: solution -> bool
+   (if (isa? e)
+       (if (isa? (al e))
+           (if (isa? (al (al e))) #f
+               (if (eq? (car (al (al e))) 'K)
+                   #t #f)) #f) #f))
+
+(define (isI? e) ; isI?: solution -> bool
+  (if (isa? e)
+      (if (isa? (al e)) #f
+          (if (eq? (car (al e)) 'I) #t #f)) #f))
+
+(define (isv? e) ; isv?: solution -> bool
+  (if (eq? (cdr e) 'sol)
+      (if (string? (car e)) #t #f)
+          #f))
+
+(define (isa? e) ; isa?: solution -> bool
+  (if (eq? (cdr e) 'sol)
+      (if (pair? (car e)) #t #f)
+      #f))
+
+(define (var e) ; var: solution -> string
+  (car e))
+
+(define (al e) ; al: solution -> solution
+  (car (car e)))
+
+(define (ar e) ; ar: solution -> solution
+  (cdr (car e)))
+
+
+(define (pprint e) ; pprint: solution -> string
+  (if (isa? e) (string-append "(" (pprint (al e)) " " (pprint (ar e)) ")")
+      (cond
+        [(eq? (car e) 'S) "S"]
+        [(eq? (car e) 'K) "K"]
+        [(eq? (car e) 'I) "I"]
+        [(isv? e) (var e)])))
+
+

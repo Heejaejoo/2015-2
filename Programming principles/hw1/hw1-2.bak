@@ -1,0 +1,11 @@
+#lang racket
+
+(provide crazy2add)
+
+(define (crazy2add lhs rhs)
+  (if (equal? (and lhs rhs) null) null
+      (if (equal? lhs null) rhs
+          (if (equal? rhs null) lhs
+              ('TODO)
+              )))
+  )

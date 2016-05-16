@@ -1,0 +1,14 @@
+exception TODO
+
+type metro = STATION of name
+	   | AREA of name * metro
+	   | CONNECT of metro * metro
+ and name = string
+
+let checkMetro (m:metro) : bool =
+let rec check_help (m:metro) (arealst): bool =
+	match m with
+	| STATION v -> List.mem v arealst
+	| AREA (a, b) -> check_help b (a::arealst)
+	| CONNECT (a, b) -> (check_help a arealst) && (check_help b arealst)	
+ in check_help m []

@@ -1,0 +1,113 @@
+(1, SEQUENCE(ASSIGN(NUM(1)),REPEAT(CHOICE(EQ(NUM(1),ASSIGN(ADD(VAR,NUM(1)))),NEQ(NUM(1),ASSIGN(SUB(VAR,NUM(1))))))))
+result([1,2])
+(1, SEQUENCE(ASSIGN(NUM(1)),REPEAT(ASSIGN(ADD(VAR,NUM(1))))))
+result([1,2,3,4,5])
+(0, REPEAT(CHOICE(ASSIGN(ADD(VAR,NUM(1))),ASSIGN(SUB(VAR,NUM(1))))))
+result([-5,-4,-3,-2,-1,0,1,2,3,4,5])
+(5, REPEAT(CHOICE(EQ(NUM(1),ASSIGN(ADD(VAR,NUM(1)))),NEQ(NUM(1),ASSIGN(SUB(VAR,NUM(1)))))))
+result([1,2,3,4,5])
+(-1, SEQUENCE(REPEAT(CHOICE(ASSIGN(ADD(VAR,NUM(1))),EQ(NUM(5),ASSIGN(SUB(VAR,NUM(1)))))),REPEAT(CHOICE(ASSIGN(SUB(VAR,NUM(1))),EQ(NUM(-5),ASSIGN(ADD(VAR,NUM(1))))))))
+result([-5,-4,-3,-2,-1,0,1,2,3,4,5])
+
+
+	
+print_list (exeval prg1 0);; (* [1 2] *) 
+
+let prg2 = SEQUENCE (ASSIGN (NUM 1), REPEAT (ASSIGN (ADD (VAR, NUM 1))) );;     (* x=1; (x=x+1); *) 
+print_list (exeval prg2 0);; (* [1 2 3 4 5] *) 
+
+let prg3 = SEQUENCE ( ASSIGN (NUM 1),   REPEAT (SEQUENCE( EQ ((NUM (-5)), ASSIGN (NUM 5)),      ASSIGN (SUB (VAR, NUM 1)) )));; 
+print_list (exeval prg3 0);; (* [-5 -4 -3 -2 -1 0 1 2 3 4] *) 
+
+let prg4 = SEQUENCE( ASSIGN (NUM 6), REPEAT( ASSIGN (ADD (VAR, NUM 1))) )       ;; 
+print_list (exeval prg4 1);; (* [1] *) 
+
+let prg5 = REPEAT( ASSIGN (NUM 3) ) ;; 
+print_list (exeval prg5 2);; (* [2 3] *) 
+
+let prg6 = CHOICE( CHOICE( REPEAT (ASSIGN (ADD (VAR, VAR))), ASSIGN (NUM (-2))), ASSIGN (NUM (-5)) );; 
+print_list (exeval prg6 1);;    (* [-5 -2 1 2 4] *) 
+
+let prg7 =  REPEAT( REPEAT( REPEAT( REPEAT (REPEAT (CHOICE( ASSIGN ( ADD (VAR, NUM 1)), ASSIGN ( SUB (VAR, NUM 1) ) ))) ) ));; 
+(*let prg7 = REPEAT (CHOICE( ASSIGN ( ADD (VAR, NUM 1)), ASSIGN ( SUB (VAR, NUM 1) ) ));; 
+  same as above, but if too slow then try me instead :) *) 
+print_list (exeval prg7 4);;    (* [-5 -4 -3 -2 -1 0 1 2 3 4 5] *) 
+
+let prg8 = SEQUENCE(EQ( NUM 3, prg5), prg6);; 
+print_list (exeval prg8 0);;    (* [-5 -2 0] *) 
+
+let prg9 = SEQUENCE( CHOICE( 
+        CHOICE(ASSIGN (NUM 1), ASSIGN(ADD (NUM 3, VAR))), 
+        CHOICE(ASSIGN (NUM (-1)), ASSIGN(NUM (-4)) ) 
+), ASSIGN (NUM (-4)));; 
+print_list (exeval prg9 5);;    (* [-4 5] *) 
+print_list (exeval prg9 2);;    (* [-4] *) 
+
+let prg10 = SEQUENCE( ASSIGN (NUM 2), CHOICE( REPEAT ( NEQ (ADD (VAR, NUM 1), prg5) ), ASSIGN (NUM 4)) );; 
+print_list (exeval prg10 0);;   (* [2 3 4] *) 
+
+let prg11 = CHOICE( CHOICE(prg4, prg1), REPEAT( CHOICE(prg6, prg10) ) );; 
+print_list (exeval prg11 0);;   (* [-5 -4 -2 0 1 2 3 4] *) 
+
+let testcmd = REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT (SEQUENCE ( ASSIGN ( NUM (-3) ), 
+REPEAT ( REPEAT ( REPEAT ( REPEAT ( SEQUENCE ( ASSIGN ( ADD (NUM (0), 
+NUM (0)) ), 
+ASSIGN ( NUM (-1) ) ) ) ) ) ) )))))) ) ) );; 
+print_list (exeval testcmd (3));; 
+
+
+# [ -3 -1 3 ] 
+- : unit = () 
+
+
+
+let testcmd = CHOICE ( ASSIGN ( NUM (-1) ), 
+CHOICE ( REPEAT ( ASSIGN ( NUM (3) ) ), 
+REPEAT ( EQ ( ADD (VAR, VAR), 
+REPEAT ( EQ ( NUM (3), 
+EQ ( NUM (-1), 
+SEQUENCE ( CHOICE ( CHOICE ( ASSIGN ( NUM (2) ), 
+ASSIGN ( NUM (-1) ) ), 
+CHOICE ( ASSIGN ( NUM (-3) ), 
+ASSIGN ( NUM (-3) ) ) ), 
+CHOICE ( CHOICE ( ASSIGN ( VAR ), 
+ASSIGN ( ADD (NUM (0), 
+NUM (0)) ) ), 
+CHOICE ( ASSIGN ( NUM (3) ), 
+ASSIGN ( VAR ) ) ) ) ) ) ) ) ) ) );; 
+print_list (exeval testcmd (3));; 
+
+# [ -1 3 ] 
+- : unit = () 
+
+
+let testcmd = SEQUENCE ( CHOICE ( ASSIGN ( NUM (0) ), 
+REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT (CHOICE ( SEQUENCE ( CHOICE ( SEQUENCE ( CHOICE ( ASSIGN ( ADD (ADD (ADD (ADD (NUM (3), 
+NUM (-3)), 
+VAR), 
+NUM (1)), 
+NUM (2)) ), 
+REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT (ASSIGN ( SUB (VAR, NUM (-2)) )))))) ), 
+EQ ( NUM (-2), 
+SEQUENCE ( ASSIGN ( ADD (VAR, NUM (1)) ), 
+ASSIGN ( NUM (-1) ) ) ) ), 
+NEQ ( NUM (-2), 
+CHOICE ( REPEAT ( ASSIGN ( VAR ) ), 
+SEQUENCE ( ASSIGN ( NUM (-3) ), 
+ASSIGN ( NUM (2) ) ) ) ) ), 
+ASSIGN ( NUM (0) ) ), 
+REPEAT ( SEQUENCE ( CHOICE ( REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT (ASSIGN ( NUM (2) )))))), 
+SEQUENCE ( REPEAT ( ASSIGN ( NUM (3) ) ), 
+EQ ( ADD (NUM (0), 
+NUM (-2)), 
+ASSIGN ( NUM (1) ) ) ) ), 
+REPEAT ( REPEAT ( REPEAT ( REPEAT ( REPEAT (SEQUENCE ( SEQUENCE ( ASSIGN ( NUM (-2) ), 
+ASSIGN ( VAR ) ), 
+SEQUENCE ( ASSIGN ( SUB (NUM (3), 
+NUM (2)) ), 
+ASSIGN ( NUM (3) ) ) )))))) ) ) )))))) ) ), 
+ASSIGN ( NUM (-2) ) );; 
+print_list (exeval testcmd (-2));; 
+
+# [ -2 3 4 5 ] 
+- : unit = ()

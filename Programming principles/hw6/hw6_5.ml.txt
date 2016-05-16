@@ -1,0 +1,23 @@
+exception TODO
+
+ type ae =
+  | CONST of int
+  | VAR of string
+  | POWER of string * int
+  | TIMES of ae list
+  | SUM of ae list
+	
+
+let rec diff (e: ae) (x: string): ae =
+  match e with
+	| CONST a -> CONST 0
+	| VAR a -> if (compare a x) == 0 then CONST 1 else CONST 0
+	| POWER(a, b) -> if (compare a x) == 0 && (b != 0) then TIMES[CONST b; POWER(a, (b - 1))] else CONST 0
+	| TIMES a -> (match a with
+								| [] -> CONST 0
+								| lst::[] -> diff lst x
+								| fst::lst -> if (compare fst (CONST 0)) == 0 then CONST 0 else SUM[TIMES[fst; diff (TIMES lst) x]; TIMES[diff fst x; TIMES lst]])
+								
+	| SUM a -> (match a with
+							| [] -> CONST 0
+							| fst::lst -> SUM[diff fst x; diff (SUM lst) x])

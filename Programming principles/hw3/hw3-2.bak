@@ -1,0 +1,20 @@
+#lang racket
+
+(require "hw3-2-library.rkt")
+
+(provide maze-check)
+
+(define (maze-check maze start end)
+  (define (maze-check-aux set)
+    (if (is-member? end set) #t
+        (maze-check-aux (add-all-adjacent set))))
+  (maze-check-aux (add-element start empty-set))
+  )
+
+(define (add-adjacent-room roomlist set)
+  (if (is-subset? (roomlist set)
+      set
+      (if (equal? (roomlist empty-set))
+          set
+          (add-adjacent-room (cdr roomlist) (add-element (car roomlist) set)))))) 
+  

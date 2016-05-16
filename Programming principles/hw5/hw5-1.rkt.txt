@@ -1,0 +1,15 @@
+#lang racket
+
+(provide inl inr case-sum)
+
+(define (inl v)
+  (cons 'left v))
+
+(define (inr v)
+  (cons 'right v))
+
+(define (case-sum f1 f2 s)
+  (if (pair? s)
+      (if (eq? (car s) 'left) (f1 (cdr s))
+          (if (eq? (car s) 'right) (f2 (cdr s)) (raise 'Wronginput)))
+      (raise 'Wronginput)))

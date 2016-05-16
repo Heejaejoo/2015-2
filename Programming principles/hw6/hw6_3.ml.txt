@@ -1,0 +1,32 @@
+exception Notfound
+
+type team = Korea | France | Usa | Brazil | Japan | Nigeria | Cameroon
+          | Poland | Portugal | Italy | Germany | Norway | Sweden | England
+          | Argentina
+
+type tourna = LEAF of team
+            | NODE of tourna * tourna
+
+let to_string team = 
+	match team with
+	| Korea -> "Korea" | France -> "France" | Usa -> "Usa" | Brazil -> "Brazil" | Japan -> "Japan" | Nigeria -> "Nigeria"
+	| Cameroon -> "Cameroon" | Poland -> "Poland" | Portugal -> "Portugal" | Italy -> "Italy" | Germany -> "Germany" | Norway -> "Norway"
+	| Sweden -> "Sweden" | England -> "England" | Argentina -> "Argentina"
+
+let rec parenize (t: tourna): string =
+	match t with
+	| LEAF v -> to_string v
+	| NODE(a, b) -> "(" ^ parenize a ^ " " ^ parenize b ^ ")"
+
+let rec drop_t (t: tourna) (d: team): tourna =
+	match t with
+	| LEAF v -> if d == v then raise Notfound else LEAF v
+	| NODE(LEAF a, LEAF b) -> if a == d then LEAF b else if b = d then LEAF a else NODE(LEAF a, LEAF b)
+	| NODE(LEAF a, b) -> if a == d then b else NODE(LEAF a, drop_t b d)
+	| NODE(a, LEAF b) -> if b == d then a else NODE(drop_t a d, LEAF b)
+	| NODE(a, b) -> NODE(drop_t a d, drop_t b d)
+
+let rec drop (t: tourna) (d: team): string =
+	try
+  let t1 = drop_t t d in parenize t1
+	with Notfound -> ""

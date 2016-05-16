@@ -1,0 +1,44 @@
+#lang racket
+(require "hw1-4.rkt")
+(provide model make-branch make-mobile)
+(provide weight is-balanced?)
+
+(define (model n)
+ (leaf n))
+
+(define (make-branch n m)
+  (cons n (leaf m)))
+
+(define (make-mobile b1 b2)
+  (list b1 b2))
+
+(define (weight m)
+  (if (is-leaf? m) (leaf-val m)
+      (+ (weight (leaf-val (cdr (nth-child m 0)))) (weight (leaf-val (cdr (nth-child m 1))))))
+)
+
+(define (is-balanced? m)
+  (if (is-leaf? m) #t
+      (if (and
+           (and (is-balanced? (car (cdr (nth-child m 0))))
+               (is-balanced? (car (cdr (nth-child m 1)))))
+           (equal? (* (car (car m)) (weight (car (cdr (nth-child m 0)))))
+                (* (car (nth-child m 1)) (weight (car (cdr (nth-child m 1))))
+                   )))
+          #t #f)))
+
+(define mdl1 (model 1))
+(define mdl2 (model 2))
+(define b1 (make-branch 12 mdl1))
+(define b2 (make-branch 7 mdl2))
+(define mbl1 (make-mobile b1 b2))
+
+(define mdl3 (model 6))
+(define mdl4 (model 4))
+(define b3 (make-branch 10 mdl3))
+(define b4 (make-branch 15 mdl4))
+(define mbl2 (make-mobile b4 b3))
+
+(define b5 (make-branch 10 mbl1))
+(define b6 (make-branch 3 mbl2))
+(define mbl3 (make-mobile b5 b6))

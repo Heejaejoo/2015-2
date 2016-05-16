@@ -1,0 +1,8 @@
+#lang racket
+
+(provide iter)
+
+(define (iter n f) 
+ (lambda (x)
+   (if (= n 0) x
+          (f ((iter (- n 1) f) x)))))

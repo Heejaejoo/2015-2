@@ -1,0 +1,52 @@
+#lang racket
+
+(require racket/match)
+(require "common-grade.rkt")
+(require "hw4-2.rkt")
+
+(sgoutput
+ (lambda ()
+   (equal?
+    (react (a (a (a S K) I) (v "x")))
+    "x")))
+(sgoutput
+ (lambda ()
+   (equal?
+    (react (a (a K (v "x")) (a I (v "x"))))
+    "x")))
+(sgoutput
+ (lambda ()
+   (equal?
+    (react (a (a (a (v "x") (v "y")) (v "z")) (v "w")))
+    "(((x y) z) w)")))
+(equal?
+ (react S)
+ "S")
+(equal?
+ (react K)
+ "K")
+(equal?
+ (react I)
+ "I")
+(equal?
+ (react (v "1"))
+ "1")
+(equal? 
+ (react (a I (v "x"))) 
+ "x") 
+(equal? 
+ (react (a (a K (v "x")) (v "y"))) 
+ "x") 
+(equal? 
+ (react (a (a (a S (v "x")) (v "y")) (v "z"))) 
+ "((x z) (y z))") 
+(equal? 
+ (react (a (a (a S K) S) K)) 
+ "K") 
+(equal? 
+ (react (a (a (a (a S (a K (a S I))) K) (v "x")) (v "y"))) 
+ "(y x)")
+(equal? 
+ (react (a (a (a (v "H") (v "e")) (a (a (a (a (a K (a I S)) (v "x")) (a I I)) (a (a K I) (v "x"))) (v "l"))) (a (a (v "o") (a (a K (a (v ",") (v "w"))) (v "x"))) (a (a (a I (v "o")) (a I (v "r"))) (a (a (a (a S (a K (a S K))) S) (a (a K (a (a K S) (v "3"))) (v "5"))) (a (v "l") (v "d")))))) 
+) 
+ "(((H e) (l l)) ((o (, w)) ((o r) (l d))))")

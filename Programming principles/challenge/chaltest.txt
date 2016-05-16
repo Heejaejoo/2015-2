@@ -1,0 +1,25 @@
+(myeval '(letrec ((f (lambda (x) (if (= x 0) 0 (+ x (f (- x 1))))))) (f 5)))
+
+(myeval '(letrec ((local-even? (lambda (n)
+                        (if (= n 0) #t
+                            (local-odd? (- n 1)))))
+         (local-odd? (lambda (n)
+                       (if (= n 0) #f
+                           (local-even? (- n 1))))))
+  (cons (local-even? 23) (local-odd? 23))))
+
+(((lambda (f) (lambda (x) (f x))) (lambda (x) (+ x 1))) 2))
+
+(myeval '(letrec ((fac (lambda (n) (if (= n 0) 1 (* n (fac (- n 1))))))) (fac 3))
+
+(myeval '(letrec ((f (lambda (x) (if (= x 0) 0 (+ x (f (- x 1))))))) (f 5)))
+
+(myeval '(let ((fac (lambda (n) (letrec ((fac-aux (lambda (m r) (if (= m 0) r (fac-aux (- m 1) (* m r)))))) (fac-aux n 1))))) (fac 3)))
+
+(myeval '(let ((x 1) (y 2)) (let ((x (+ x y)) (y (+ 3 x))) (* x y))))
+
+(myeval '(let ((power2 (lambda (n) (letrec ((power2-aux (lambda (m r) (if (= m 0) r (power2-aux (- m 1) (* 2 r)))))) (power2-aux n 1))))) (power2 3)))
+
+(myeval '((lambda (c) (((lambda (f) (lambda (x) (f x))) (lambda (x) (* c (+ x 1)))) 2)) 2))
+;neoguri
+(myeval '(let ([x 2] [f (lambda (x) (+ x 3))]) (let ([x 5] [g (lambda (x) (f x))]) (g x))))

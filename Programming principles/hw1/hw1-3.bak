@@ -1,0 +1,23 @@
+#lang racket
+
+(require "hw1-2.rkt")
+(provide crazy2mul)
+
+(define (crazy2mul lhs rhs)
+	(if (equal? ('z lhs)) '(z)
+            (if (equal? ('z rhs)) '(z)
+                )
+
+(define (list_mul lhs num)
+  (if (equal? num 'z)
+      '(z)
+      (if (equal? num 'p)
+          lhs
+          (if (equal? num 'z)
+
+(define (sign_change num)
+  (case (num)
+    [('z) 'z]
+    [('p) 'n]
+    [('n) 'p]
+    ))
